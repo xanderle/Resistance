@@ -16,7 +16,6 @@ public class bounder{
   //Intialise
 
   public Boolean[] selectBase(int size){
-    System.out.println(size);
     switch(size){
       case 10:return new Boolean[] {true,true,true,true,false,false,false,false,false};
       case 9: return new Boolean[] {true,true,true,false,false,false,false,false};

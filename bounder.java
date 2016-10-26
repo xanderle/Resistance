@@ -6,7 +6,6 @@ public class bounder{
   String name;
   String players;
   String spies;
-
   ArrayList<Boolean[]> configurations = new ArrayList<Boolean[]>();
 
 
@@ -30,11 +29,9 @@ public class bounder{
   }
   public void init(){
     Permutations<Boolean> perm = new Permutations<Boolean>( selectBase(players.length()));
-
     while(perm.hasNext()){
       Boolean[] bool = new Boolean[players.length()-1];
       bool = perm.next();
-      System.out.println(Arrays.toString(bool));
       configurations.add(bool);
     }
   }
@@ -47,9 +44,9 @@ public class bounder{
     if(init){
     init();
   }
-    for(int i =0;i<configurations.size();i++){
-      System.out.println(Arrays.toString(configurations.get(i)));
-    }
+    // for(int i =0;i<configurations.size();i++){
+    //   System.out.println(Arrays.toString(configurations.get(i)));
+    // }
     long endTime = System.nanoTime();
     System.out.println(endTime-startTime);
   }

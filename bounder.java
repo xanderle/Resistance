@@ -30,7 +30,17 @@ public class bounder{
     Permutations<Boolean> perm = new Permutations<Boolean>( selectBase(players.length()));
     while(perm.hasNext()){
       Boolean[] bool = new Boolean[players.length()-1];
-      bool = perm.next();
+      Boolean[] temp = perm.next();
+      /*
+      Bool was getting set to the iterable value so a memory address,
+      which was having it's value updated each call. By instead copying each
+      value to a new array we can avoid this. Appears to work.
+      Can we do better than the below code for copying though?
+      */
+      for (int i = 0; i < players.length()-1; i++){
+        bool[i] = temp[i];
+      }
+      System.out.println(Arrays.toString(bool));
       configurations.add(bool);
     }
   }
@@ -41,11 +51,11 @@ public class bounder{
     this.players = players;
     this.spies = spies;
     if(init){
-    init();
-  }
-    // for(int i =0;i<configurations.size();i++){
-    //   System.out.println(Arrays.toString(configurations.get(i)));
-    // }
+      init();
+    }
+    for(int i =0;i<configurations.size();i++){
+      System.out.println(Arrays.toString(configurations.get(i)));
+    }
     long endTime = System.nanoTime();
     System.out.println(endTime-startTime);
   }

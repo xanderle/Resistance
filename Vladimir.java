@@ -26,14 +26,14 @@ public class Vladimir implements Agent{
   */
   private int size;
   private int mission;
-  private int rejected;
+  private int failures;
 
   // If a spy then these are used, as know the team makeup
   private String spies;
   private String resistance;
 
   // If resistance then used to store 100% confirmed spies
-  private String spies;
+  private String known = "";
 
   public Vladimir(){
     random = new Random();
@@ -54,11 +54,30 @@ public class Vladimir implements Agent{
 
     this.size = players.length();
     this.mission = mission;
+    this.failures = failures;
     this.spies = spies;
 
+    if (mission == 1){
+      System.out.println("I AM PLAYER " + name);
+    }
+
     if (spy && mission == 1){
+        set_Resistance(players, spies);
         System.out.println("I'm a spy.");
     }
+  }
+
+  /*
+    If Vladimir is a spy then he wants to know who resistance are
+  */
+  public void set_Resistance(String players, String spies){
+    String temp = "";
+    for (Character c : players.toCharArray()){
+      if (spies.indexOf(c) == -1){
+        temp += c;
+      }
+    }
+    this.resistance = temp;
   }
 
   /**
@@ -92,6 +111,15 @@ public class Vladimir implements Agent{
    * @return true, if the agent votes for the mission, false, if they vote against it.
    * */
   public boolean do_Vote(){
+    // if (mission == 1){
+    //   return true;
+    // }
+    // else if (spy){
+    //   return false;
+    // }
+    // else {
+    //   return true;
+    // }
     return (random.nextInt(2)!=0);
   }
 
@@ -100,7 +128,7 @@ public class Vladimir implements Agent{
    * @param yays the names of the agents who voted for the mission
    **/
   public void get_Votes(String yays){
-    System.out.println("Votes for : " + yays);
+    // System.out.println("Votes for : " + yays);
   }
 
   /**
@@ -115,7 +143,8 @@ public class Vladimir implements Agent{
    * @return true if agent betrays, false otherwise
    **/
   public boolean do_Betray(){
-    return (spy?random.nextInt(2)!=0:false);
+    if (mission == 1) return false;
+    else return (spy ? true : false);
   }
 
   /**
@@ -140,8 +169,8 @@ public class Vladimir implements Agent{
       int number = random.nextInt(resistance.length());
       HashSet<Character> team = new HashSet<Character>();
       for(int i = 0; i<number; i++){
-        char c = players.charAt(random.nextInt(resistance.length()));
-        while(team.contains(c)) c = players.charAt(random.nextInt(resistance.length()));
+        char c = resistance.charAt(random.nextInt(resistance.length()));
+        while(team.contains(c)) c = resistance.charAt(random.nextInt(resistance.length()));
         team.add(c);
       }
       String tm = "";
@@ -150,7 +179,8 @@ public class Vladimir implements Agent{
     }
     // If resistance then Vladimir will only notify of confirmed spies
     else {
-      return known;
+      return "Z";
+      // return known;
     }
   }
 

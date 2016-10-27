@@ -10,10 +10,10 @@ public class Test{
   public static void RandomGame(){
     Game g = new Game();
     g.addPlayer(new Vladimir());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
+    g.addPlayer(new Vladimir());
+    g.addPlayer(new Vladimir());
+    g.addPlayer(new Vladimir());
+    g.addPlayer(new Vladimir());
     g.setup();
     g.play();
   }

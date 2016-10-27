@@ -28,6 +28,13 @@ public class Vladimir implements Agent{
   private int mission;
   private int rejected;
 
+  // If a spy then these are used, as know the team makeup
+  private String spies;
+  private String resistance;
+
+  // If resistance then used to store 100% confirmed spies
+  private String spies;
+
   public Vladimir(){
     random = new Random();
   }
@@ -47,6 +54,7 @@ public class Vladimir implements Agent{
 
     this.size = players.length();
     this.mission = mission;
+    this.spies = spies;
 
     if (spy && mission == 1){
         System.out.println("I'm a spy.");
@@ -125,16 +133,25 @@ public class Vladimir implements Agent{
    * @return a string containing the name of each accused agent.
    * */
   public String do_Accuse(){
-    int number = random.nextInt(players.length());
-    HashSet<Character> team = new HashSet<Character>();
-    for(int i = 0; i<number; i++){
-      char c = players.charAt(random.nextInt(players.length()));
-      while(team.contains(c)) c = players.charAt(random.nextInt(players.length()));
-      team.add(c);
+    /*
+      If a spy, then Vladimir will nominate a random number of resistance
+    */
+    if (spy){
+      int number = random.nextInt(resistance.length());
+      HashSet<Character> team = new HashSet<Character>();
+      for(int i = 0; i<number; i++){
+        char c = players.charAt(random.nextInt(resistance.length()));
+        while(team.contains(c)) c = players.charAt(random.nextInt(resistance.length()));
+        team.add(c);
+      }
+      String tm = "";
+      for(Character c: team)tm+=c;
+      return tm;
     }
-    String tm = "";
-    for(Character c: team)tm+=c;
-    return tm;
+    // If resistance then Vladimir will only notify of confirmed spies
+    else {
+      return known;
+    }
   }
 
   /**

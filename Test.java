@@ -1,9 +1,9 @@
 import java.util.*;
 import java.io.*;
 /**
- * A Class to test the Game state and AI's
- * @author Jake Nelson
- * */
+* A Class to test the Game state and AI's
+* @author Jake Nelson
+* */
 
 public class Test{
 
@@ -23,7 +23,7 @@ public class Test{
       System.out.println("Has args");
     }
     else {
-        RandomGame();
+      RandomGame();
     }
   }
 

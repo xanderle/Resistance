@@ -17,26 +17,28 @@ public class Vladimir implements Agent{
     Class to describe other Players
   */
   private class Player implements Comparable<Player>{
-    private Integer suspicion;
+    private Double suspicion;
+    private int fails;
     private char name;
     @Override
       public int compareTo(Player otherPlayer) {
         return otherPlayer.getSuspicion().compareTo(this.suspicion);
       }
 
-    public Integer getSuspicion(){
+    public Double getSuspicion(){
       return this.suspicion;
     }
     public char getName(){
       return this.name;
     }
-    public void setSuspicion(int suspicion){
+    public void setSuspicion(Double suspicion){
       this.suspicion = suspicion;
     }
 
     public Player(char name){
       this.name = name;
-      suspicion = 0;
+      suspicion = 0.0;
+      fails = 0;
     }
   }
 
@@ -64,8 +66,9 @@ public class Vladimir implements Agent{
 
   private ArrayList<Player> suspects = new ArrayList<Player>();
 
-  private String leader;
-  private String proposed;
+  private String proposed, leader, latest, yays;
+  private int traitors;
+  private boolean present;
 
   public Vladimir(){
     random = new Random();
@@ -103,13 +106,13 @@ public class Vladimir implements Agent{
       Collections.sort(suspects, Collections.reverseOrder());
 
       for (Player s : suspects){
-        System.out.println("PLAYER : " + s.getName() + " SUSPICION IS : " + s.getSuspicion());
+        // System.out.println("PLAYER : " + s.getName() + " SUSPICION IS : " + s.getSuspicion());
       }
     }
 
     if (spy && mission == 1){
         set_Resistance(players, spies);
-        System.out.println("I'M A SPY.");
+        // System.out.println("I'M A SPY.");
     }
   }
 
@@ -153,7 +156,7 @@ public class Vladimir implements Agent{
     team.add(name.charAt(0));
     String tm = "";
     for(Character c: team)tm+=c;
-    System.out.println("\n*****\nI " + name + " nominate : " + tm + "\n*****\n");
+    // System.out.println("\n*****\nI " + name + " nominate : " + tm + "\n*****\n");
     return tm;
   }
 
@@ -175,7 +178,7 @@ public class Vladimir implements Agent{
   public boolean do_Vote(){
 
     // Else if first mission then there is no knowledge so vote to confirm
-    if (mission == 1){
+    if (mission == 1 || failures == 4){
       return true;
     }
     // If spy then vote for if a spy is in the nomination
@@ -189,7 +192,13 @@ public class Vladimir implements Agent{
       return false;
     }
     else {
-      reevaluate();
+      for (int i = 0; i < spies.length(); i++){
+          Player p = suspects.get(i);
+          // // System.out.println(p.getName() + " : " + p.getSuspicion());
+          if (proposed.indexOf(p.getName()) != -1){
+            return false;
+          }
+      }
       // Check if our highest suspects are in the team and vote if better than half? Needs refining of premise.
       return true;
     }
@@ -197,14 +206,50 @@ public class Vladimir implements Agent{
     // return (random.nextInt(2)!=0);
   }
 
-  private void reevaluate(){}
+  private void reevaluate(){
+
+    /*
+      THIS IS WHERE WE GONNA GET OUR DETECTIVE HAT ON
+      OH SH*T! THE GAME IS AFOOT.
+
+      First spread blame for votes among number on mission evenly,
+      accounting for not blaming self if were present on mission
+    */
+    if (present){
+      double increase = (double)traitors / (latest.length() - 1);
+      // System.out.println("*****   " + name + "     *****");
+      // System.out.println("TRAITORS: "+traitors+ " LENGTH: "+latest.length()+" INCREASE: "+increase);
+      for (Player p : suspects){
+        if (latest.indexOf(p.getName()) != -1){
+          p.setSuspicion(p.getSuspicion() + increase);
+        }
+      }
+    }
+    else {
+      double increase = (double)traitors / (latest.length());
+      // System.out.println("*****   " + name + "     *****");
+      // System.out.println("TRAITORS: "+traitors+ " LENGTH: "+latest.length()+" INCREASE: "+increase);
+      for (Player p : suspects){
+        if (latest.indexOf(p.getName()) != -1){
+          p.setSuspicion(p.getSuspicion() + increase);
+        }
+      }
+    }
+
+    Collections.sort(suspects);
+    for (int i = 0; i < 2; i++){
+        Player p = suspects.get(i);
+        // System.out.println(p.getName() + " : " + p.getSuspicion());
+    }
+
+  }
 
   /**
    * Reports the votes for the previous mission
    * @param yays the names of the agents who voted for the mission
    **/
   public void get_Votes(String yays){
-    // System.out.println("Votes for : " + yays);
+    this.yays = yays;
   }
 
   /**
@@ -212,7 +257,13 @@ public class Vladimir implements Agent{
    * Should be able to be infered from tell_ProposedMission and tell_Votes, but incldued for completeness.
    * @param mission the Agents being sent on a mission
    **/
-  public void get_Mission(String mission){}
+  public void get_Mission(String mission){
+    this.latest = mission;
+    if (mission.indexOf(name) != -1){
+      this.present = true;
+    }
+    else this.present = false;
+  }
 
   /**
    * Agent chooses to betray or not.
@@ -227,7 +278,14 @@ public class Vladimir implements Agent{
    * Reports the number of people who betrayed the mission
    * @param traitors the number of people on the mission who chose to betray (0 for success, greater than 0 for failure)
    **/
-  public void get_Traitors(int traitors){}
+  public void get_Traitors(int traitors){
+    if (traitors != 0){
+      this.traitors = traitors;
+      if (!spy){
+        reevaluate();
+      }
+    }
+  }
 
 
   /**

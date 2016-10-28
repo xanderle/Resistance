@@ -7,8 +7,10 @@ import java.io.*;
 
 public class Test{
 
-  public static void RandomGame(){
-    Game g = new Game();
+  private static int n = 1;
+
+  public static boolean RunGame(){
+    Logger g = new Logger("log.txt");
     g.addPlayer(new Vladimir());
     g.addPlayer(new Vladimir());
     g.addPlayer(new Vladimir());
@@ -16,15 +18,20 @@ public class Test{
     g.addPlayer(new Vladimir());
     g.setup();
     g.play();
+    return g.government;
   }
 
   public static void main(String[] args){
-    if (args.length > 0){
-      System.out.println("Has args");
+    if (args.length > 0){      
+      n = Integer.parseInt(args[0]);
     }
-    else {
-      RandomGame();
+    int count = 0;
+    for (int i = 0; i < n; i++){
+      if (RunGame()){
+        count++;
+      }
     }
+    System.out.println("Government: " + (double)count/n * 100 + "%\nResistance: " + (double)(n-count)/n * 100 + "%");
   }
 
 }

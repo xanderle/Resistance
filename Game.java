@@ -20,7 +20,7 @@ public class Game{
   private File logFile;
   private boolean logging = false;
   private boolean started = false;
-
+  private long stopwatch = 0;
 
 
   /**
@@ -41,6 +41,9 @@ public class Game{
     init();
   }
 
+  /**
+   * Initializes the data structures for the game
+   * */
   private void init(){
     players = new HashMap<Character,Agent>();
     spies = new HashSet<Character>();
@@ -50,6 +53,10 @@ public class Game{
     log("Seed: "+seed);
   }
 
+  /**
+   * Writes the String to the log file
+   * @param msg the String to log
+   * */
   private void log(String msg){
     if(logging){
       try{
@@ -58,9 +65,7 @@ public class Game{
         log.close();
       }catch(IOException e){e.printStackTrace();}
     }
-    else{
-      System.out.println(msg);
-    }
+    System.out.println(msg);
   }
 
 
@@ -68,13 +73,14 @@ public class Game{
    * Adds a player to a game. Once a player is added they cannot be removed
    * @param a the agent to be added
    * */
-  public void addPlayer(Agent a){
+  public char addPlayer(Agent a){
     if(numPlayers > 9) throw new RuntimeException("Too many players");
     else if(started) throw new RuntimeException("Game already underway");
     else{
       Character name = (char)(65+numPlayers++);
       players.put(name, a);
       log("Player "+name+" added.");
+      return name;
     }
   }
 
@@ -95,12 +101,35 @@ public class Game{
       }
       for(Character c: players.keySet())playerString+=c;
       for(Character c: spies){spyString+=c; resString+='?';}
+      char[] pArr = playerString.toCharArray();
+      Arrays.sort(pArr);
+      playerString = new String(pArr);
+      char[] sArr = spyString.toCharArray();
+      Arrays.sort(sArr);
+      spyString = new String(sArr);
       statusUpdate(1,0);
       started= true;
       log("Game set up. Spys allocated");
     }
   }
 
+  /**
+   * Starts a timer for Agent method calls
+   * */
+  private void stopwatchOn(){
+    stopwatch = System.currentTimeMillis();
+  }
+
+  /**
+   * Checks how if timelimit exceed and if so, logs a violation against a player.
+   * @param limit the limit since stopwatch start, in milliseconds
+   * @param player the player who the violation will be recorded against.
+   * */
+  private void stopwatchOff(long limit, Character player){
+    long delay = System.currentTimeMillis()-stopwatch;
+    if(delay>limit)
+      log("Player: "+player+". Time exceeded by "+delay);
+  }
 
   /**
    * Sends a status update to all players.
@@ -110,10 +139,12 @@ public class Game{
    **/
   private void statusUpdate(int round, int fails){
     for(Character c: players.keySet()){
-      if(spies.contains(c))
-        players.get(c).get_status(""+c,playerString,spyString,round,fails);
-      else
-        players.get(c).get_status(""+c,playerString,resString,round,fails);
+      if(spies.contains(c)){
+        stopwatchOn(); players.get(c).get_status(""+c,playerString,spyString,round,fails); stopwatchOff(100,c);
+      }
+      else{
+        stopwatchOn(); players.get(c).get_status(""+c,playerString,resString,round,fails); stopwatchOff(100,c);
+      }
     }
   }
 
@@ -123,10 +154,9 @@ public class Game{
    * @param round the round in the game the mission is for.
    * @return a String containing the names of the agents being sent on the mission
    * */
-  private String nominate(int round){
-    Character leader = (char)(rand.nextInt(numPlayers)+65);
+  private String nominate(int round, Character leader){
     int mNum = missionNum[numPlayers-5][round-1];
-    String team = players.get(leader).do_Nominate(mNum);
+    stopwatchOn(); String team = players.get(leader).do_Nominate(mNum); stopwatchOff(1000,leader);
     char[] tA = team.toCharArray();
     Arrays.sort(tA);
     boolean legit = tA.length==mNum;
@@ -138,8 +168,9 @@ public class Game{
       team = "";
       for(int i = 0; i< mNum; i++) team+=(char)(65+i);
     }
-    for(Character c: players.keySet())
-      players.get(c).get_ProposedMission(leader+"", team);
+    for(Character c: players.keySet()){
+      stopwatchOn(); players.get(c).get_ProposedMission(leader+"", team); stopwatchOff(100, c);
+    }
     log(leader+" nominated "+team);
     return team;
   }
@@ -153,13 +184,18 @@ public class Game{
    int votes = 0;
    String yays = "";
    for(Character c: players.keySet()){
+      stopwatchOn();
       if(players.get(c).do_Vote()){
         votes++;
         yays+=c;
        }
+      stopwatchOff(1000,c);
     }
-    for(Character c: players.keySet())
+    for(Character c: players.keySet()){
+      stopwatchOn();
       players.get(c).get_Votes(yays);
+      stopwatchOff(100,c);
+    }
     log(votes+" votes for: "+yays);
     return (votes>numPlayers/2);
   }
@@ -173,30 +209,40 @@ public class Game{
    * @return the number of agents who betray the mission.
    * */
   public int mission(String team){
-    for(Character c: players.keySet())
+    for(Character c: players.keySet()){
+      stopwatchOn();
       players.get(c).get_Mission(team);
+      stopwatchOff(100,c);
+    }
     int traitors = 0;
     for(Character c: team.toCharArray()){
-      //check for spies here.
-      if(players.get(c).do_Betray()) traitors++;
+      stopwatchOn();
+      if(spies.contains(c) && players.get(c).do_Betray()) traitors++;
+      stopwatchOff(1000,c);
     }
-    for(Character c: players.keySet())
+    for(Character c: players.keySet()){
+      stopwatchOn();
       players.get(c).get_Traitors(traitors);
-    log(traitors +" betrayed the mission");
+      stopwatchOff(100,c);
+    }
+    log(traitors +(traitors==1?" spy ":" spies ")+ "betrayed the mission");
     return traitors;
   }
 
   /**
    * Conducts the game play, consisting of 5 rounds, each with a series of nominations and votes, and the eventual mission.
    * It logs the result of the game at the end.
+   * @return the number of failed missions
    * */
-  public void play(){
+  public int play(){
     int fails = 0;
+    int leader = (rand.nextInt(numPlayers));
     for(int round = 1; round<=5; round++){
-      String team = nominate(round);
+      String team = nominate(round, playerString.charAt(leader++%numPlayers));
+      leader%=numPlayers;
       int voteRnd = 0;
       while(voteRnd++<5 && !vote())
-        team = nominate(round);
+        team = nominate(round, playerString.charAt(leader++%numPlayers));
       log(team+" elected");
       int traitors = mission(team);
       if(traitors !=0 && (traitors !=1 || round !=4 || numPlayers<7)){
@@ -206,17 +252,137 @@ public class Game{
       else log("Mission succeeded");
       statusUpdate(round+1, fails);
       HashMap<Character,String> accusations = new HashMap<Character, String>();
-      for(Character c: players.keySet())
+      for(Character c: players.keySet()){
+        stopwatchOn();
         accusations.put(c,players.get(c).do_Accuse());
+        stopwatchOff(1000,c);
+      }
       for(Character c: players.keySet()){
         log(c+" accuses "+accusations.get(c));
-        for(Character a: players.keySet())
+        for(Character a: players.keySet()){
+          stopwatchOn();
           players.get(a).get_Accusation(c+"", accusations.get(c));
+          stopwatchOff(100,c);
+        }
       }
     }
     if(fails>2) log("Government Wins! "+fails+" missions failed.");
     else log("Resistance Wins! "+fails+" missions failed.");
     log("The Government Spies were "+spyString+".");
+    return fails;
+  }
+
+
+
+  static class Competitor implements Comparable{
+    private Class agent;
+    private String name;
+    private String authors;
+    public int spyWins;
+    public int spyPlays;
+    public int resWins;
+    public int resPlays;
+
+    public Competitor(Agent agent, String name, String authors){
+      this.agent = agent.getClass();
+      this.name = name;
+      this.authors = authors;
+    }
+
+    public int compareTo(Object o){
+      try{
+        Competitor c = (Competitor) o;
+        return (int)(1000*(this.winRate()-c.winRate()));
+      }
+      catch(Exception e){return 1;}
+    }
+
+    public Agent getAgent(){
+     try{return (Agent)agent.newInstance();}
+     catch(Exception e){return null;}
+    }
+
+    public String getName(){return name;}
+
+    public String getAuthors(){return authors;}
+
+    public void spyWin(){
+      spyWins++;spyPlays++;
+    }
+
+    public void spyLoss(){
+      spyPlays++;
+    }
+
+    public void resWin(){
+      resWins++;resPlays++;
+    }
+
+    public void resLoss(){
+      resPlays++;
+    }
+
+    public double spyWinRate(){
+      return (1.0*spyWins)/spyPlays;
+    }
+
+    public double resWinRate(){
+      return (1.0*resWins)/resPlays;
+    }
+
+    public double winRate(){
+      return (1.0*(spyWins+resWins))/(spyPlays+resPlays);
+    }
+
+    public String toString(){
+      return "<tr><td>"+name+
+        "</td><td>"+authors+
+        "</td><td>"+spyWins+
+        "</td><td>"+spyPlays+
+        "</td><td>"+resWins+
+        "</td><td>"+resPlays+
+        "</td><td>"+winRate()+
+        "</td></tr>\n";
+    }
+  }
+
+  public static String tournament(Competitor[] agents, int rounds){
+    Random tRand = new Random();
+    for(int round = 0; round<rounds; round++){
+      Game g = new Game("Round"+round+".txt");
+      int playerNum = 5+tRand.nextInt(6);
+      for(int i = 0; i<playerNum; i++){
+        int index = tRand.nextInt(agents.length);
+        g.stopwatchOn();char name = g.addPlayer(agents[index].getAgent());g.stopwatchOff(1000,name);
+        g.log("Player "+ agents[index].getName()+" from "+agents[index].getAuthors()+" is "+name);
+      }
+      g.setup();
+      int fails = g.play();
+      int i = 0;
+      char[] spies = g.spyString.toCharArray();
+      for(Character c: g.playerString.toCharArray()){
+        for(Competitor cc: agents){
+          if(cc.agent.isInstance(g.players.get(c))){
+            if(i<spies.length && c==spies[i]){
+              if (fails>2) cc.spyWin();
+              else cc.spyLoss();
+              i++;
+            }
+            else{
+              if(fails>2) cc.resLoss();
+              else cc.resWin();
+            }
+          g.log(cc.toString());
+          }
+        }
+      }
+    }
+    Arrays.sort(agents);
+    String ret =
+    "<html><body><table><tr><th>Name</th><th>Author</th><th>Spy Wins</th><th>Spy Plays</th><th>Res Wins</th><th>Res Plays</th><th>Win Rate</th></tr>";
+    for(int i = 0; i< agents.length; i++)
+      ret+= agents[i];
+    return ret+"</table></body></html>";
   }
 
 
@@ -224,18 +390,24 @@ public class Game{
    * Sets up game with random agents and plays
    **/
   public static void main(String[] args){
+    //Run a single game
     Game g = new Game();
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new RandomAgent());
-    g.addPlayer(new HumanAgent());
+    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'A');
+    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'B');
+    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'C');
+    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'D');
+    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'E');
     g.setup();
     g.play();
-  }
+    /*Run a tournament*/
+  //   try{
+  //     File f = new File("Results.html");
+  //     FileWriter fw = new FileWriter(f);
+  //     Competitor[] contenders = {new Competitor(new RandomAgent(),"Randy","Tim")};
+  //     fw.write(tournament(contenders, 10));
+  //     fw.close();
+  //   }
+  //   catch(IOException e){System.out.println("IO fail");}
+   }
+
 }

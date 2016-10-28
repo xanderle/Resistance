@@ -62,7 +62,10 @@ public class Vladimir implements Agent{
   // If resistance then used to store 100% confirmed spies
   private String known = "";
 
-  private ArrayList<Player> suspects = new ArrayList<Player>();;
+  private ArrayList<Player> suspects = new ArrayList<Player>();
+
+  private String leader;
+  private String proposed;
 
   public Vladimir(){
     random = new Random();
@@ -106,7 +109,7 @@ public class Vladimir implements Agent{
 
     if (spy && mission == 1){
         set_Resistance(players, spies);
-        System.out.println("I'm a spy.");
+        System.out.println("I'M A SPY.");
     }
   }
 
@@ -131,6 +134,7 @@ public class Vladimir implements Agent{
    * @return a String containing the names of all the agents in a mission
    * */
   public String do_Nominate(int number){
+    // If the first mission then pick at random
     if (mission == 1){
       HashSet<Character> team = new HashSet<Character>();
       for(int i = 0; i<number-1; i++){
@@ -158,7 +162,11 @@ public class Vladimir implements Agent{
    * @param leader the leader who proposed the mission
    * @param mission a String containing the names of all the agents in the mission
    **/
-  public void get_ProposedMission(String leader, String mission){}
+  public void get_ProposedMission(String leader, String mission){
+    // Re-evaluate suspects based on new information
+    this.leader = leader;
+    this.proposed = mission;
+  }
 
   /**
    * Gets an agents vote on the last reported mission
@@ -170,16 +178,26 @@ public class Vladimir implements Agent{
     if (mission == 1){
       return true;
     }
-    // If spy then vote to fail the mission
+    // If spy then vote for if a spy is in the nomination
     else if (spy){
+      for (int i = 0; i < proposed.length(); i++){
+        if (spies.indexOf(proposed.charAt(i)) != -1){
+          return true;
+        }
+      }
+      // TODO: Add stealthy voting to not always reject the mission if spy not in it
       return false;
     }
     else {
+      reevaluate();
+      // Check if our highest suspects are in the team and vote if better than half? Needs refining of premise.
       return true;
     }
 
     // return (random.nextInt(2)!=0);
   }
+
+  private void reevaluate(){}
 
   /**
    * Reports the votes for the previous mission

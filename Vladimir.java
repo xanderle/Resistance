@@ -14,6 +14,33 @@ import java.util.*;
 public class Vladimir implements Agent{
 
   /*
+    Class to describe other Players
+  */
+  private class Player implements Comparable<Player>{
+    private Integer suspicion;
+    private char name;
+    @Override
+      public int compareTo(Player otherPlayer) {
+        return otherPlayer.getSuspicion().compareTo(this.suspicion);
+      }
+
+    public Integer getSuspicion(){
+      return this.suspicion;
+    }
+    public char getName(){
+      return this.name;
+    }
+    public void setSuspicion(int suspicion){
+      this.suspicion = suspicion;
+    }
+
+    public Player(char name){
+      this.name = name;
+      suspicion = 0;
+    }
+  }
+
+  /*
     Variables common to all from Tim's implementation
   */
   private String name;
@@ -35,6 +62,8 @@ public class Vladimir implements Agent{
   // If resistance then used to store 100% confirmed spies
   private String known = "";
 
+  private ArrayList<Player> suspects = new ArrayList<Player>();;
+
   public Vladimir(){
     random = new Random();
   }
@@ -48,17 +77,31 @@ public class Vladimir implements Agent{
    * @param failures the number of failed missions
    * */
   public void get_status(String name, String players, String spies, int mission, int failures){
-    this.name = name;
-    this.players = players;
-    spy = spies.indexOf(name)!=-1;
 
-    this.size = players.length();
     this.mission = mission;
     this.failures = failures;
-    this.spies = spies;
 
     if (mission == 1){
-      System.out.println("I AM PLAYER " + name);
+      // Tim's code
+      this.name = name;
+      this.players = players;
+      spy = spies.indexOf(name)!=-1;
+
+      this.size = players.length();
+      this.spies = spies;
+
+      // Add Players representations
+      for (int i = 0; i < size; i++){
+        Player p = new Player(players.charAt(i));
+        // p.setSuspicion(random.nextInt(100));
+        suspects.add(p);
+      }
+
+      Collections.sort(suspects, Collections.reverseOrder());
+
+      for (Player s : suspects){
+        System.out.println("PLAYER : " + s.getName() + " SUSPICION IS : " + s.getSuspicion());
+      }
     }
 
     if (spy && mission == 1){
@@ -88,14 +131,25 @@ public class Vladimir implements Agent{
    * @return a String containing the names of all the agents in a mission
    * */
   public String do_Nominate(int number){
+    if (mission == 1){
+      HashSet<Character> team = new HashSet<Character>();
+      for(int i = 0; i<number-1; i++){
+        char c = players.charAt(random.nextInt(players.length()));
+        while(team.contains(c)) c = players.charAt(random.nextInt(players.length()));
+        team.add(c);
+      }
+    }
+    // Don't pick the same from the first team
     HashSet<Character> team = new HashSet<Character>();
-    for(int i = 0; i<number; i++){
+    for(int i = 0; i<number-1; i++){
       char c = players.charAt(random.nextInt(players.length()));
       while(team.contains(c)) c = players.charAt(random.nextInt(players.length()));
       team.add(c);
     }
+    team.add(name.charAt(0));
     String tm = "";
     for(Character c: team)tm+=c;
+    System.out.println("\n*****\nI " + name + " nominate : " + tm + "\n*****\n");
     return tm;
   }
 
@@ -111,16 +165,20 @@ public class Vladimir implements Agent{
    * @return true, if the agent votes for the mission, false, if they vote against it.
    * */
   public boolean do_Vote(){
-    // if (mission == 1){
-    //   return true;
-    // }
-    // else if (spy){
-    //   return false;
-    // }
-    // else {
-    //   return true;
-    // }
-    return (random.nextInt(2)!=0);
+
+    // Else if first mission then there is no knowledge so vote to confirm
+    if (mission == 1){
+      return true;
+    }
+    // If spy then vote to fail the mission
+    else if (spy){
+      return false;
+    }
+    else {
+      return true;
+    }
+
+    // return (random.nextInt(2)!=0);
   }
 
   /**

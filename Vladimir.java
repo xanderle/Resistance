@@ -215,20 +215,30 @@ public class Vladimir implements Agent{
       First spread blame for votes among number on mission evenly,
       accounting for not blaming self if were present on mission
     */
+
+    //  Look at traitors and add a percentage
     if (present){
       double increase = (double)traitors / (latest.length() - 1);
-      // System.out.println("*****   " + name + "     *****");
-      // System.out.println("TRAITORS: "+traitors+ " LENGTH: "+latest.length()+" INCREASE: "+increase);
-      for (Player p : suspects){
-        if (latest.indexOf(p.getName()) != -1){
-          p.setSuspicion(p.getSuspicion() + increase);
+      if (traitors == (latest.length() - 1)){
+        for (Player p : suspects){
+          if (latest.indexOf(p.getName()) != -1){
+            p.setSuspicion(p.getSuspicion() + increase);
+          }
+          else {
+            p.setSuspicion(0.0);
+          }
+        }
+      }
+      else {
+        for (Player p : suspects){
+          if (latest.indexOf(p.getName()) != -1){
+            p.setSuspicion(p.getSuspicion() + increase);
+          }
         }
       }
     }
     else {
       double increase = (double)traitors / (latest.length());
-      // System.out.println("*****   " + name + "     *****");
-      // System.out.println("TRAITORS: "+traitors+ " LENGTH: "+latest.length()+" INCREASE: "+increase);
       for (Player p : suspects){
         if (latest.indexOf(p.getName()) != -1){
           p.setSuspicion(p.getSuspicion() + increase);

@@ -82,7 +82,7 @@ class Permutations<E> implements  Iterator<E[]>{
     }
 }
 
-public class bounder implements Agent{
+public class Bounder implements Agent{
   //Internal Variables
   boolean init = true;
   String name;
@@ -97,9 +97,8 @@ public class bounder implements Agent{
   int traitors; //people that betrayed
   //map people to index;
   ArrayList<Integer> propMembers;
-
   String yays;
-
+  Boolean spy;
   Random randomGenerator = new Random();
   public Boolean[] selectBase(int size){
     switch(size){
@@ -113,6 +112,21 @@ public class bounder implements Agent{
     }
   }
 
+  public void get_status(String name, String players, String spies, int mission, int failures){
+    if(init){
+      System.out.println("Spies are " + spies);
+      this.name = name;
+      this.players = new ArrayList<String>(Arrays.asList(players.replaceAll(name,"").split("")));
+      System.out.println(name);
+      System.out.println(this.players.toString());
+      this.spies = spies;
+      if(spies.indexOf(name)!=-1){spy = true;}
+      else{spy = false;};
+      System.out.println(spy);
+      init();
+      init = false;
+    }
+  }
   public void init(){
     Permutations<Boolean> perm = new Permutations<Boolean>( selectBase(players.size()));
     int j =0;
@@ -123,11 +137,11 @@ public class bounder implements Agent{
         bool[i] = temp[i];
       }
       optimistic.add(bool);
-      //System.out.println(Arrays.toString(optimistic.get(j)));
+      System.out.println(Arrays.toString(optimistic.get(j)));
       j++;
     }
     pessimistic.addAll(optimistic);
-    //System.out.println("------------------------");
+    System.out.println("------------------------");
   }
 
   public ArrayList<Integer> onMission(){
@@ -193,22 +207,13 @@ public class bounder implements Agent{
 
     }
   }
-  public void get_status(String name, String players, String spies, int mission, int failures){
-    if(init){
-      this.name = name;
-      this.players = new ArrayList<String>(Arrays.asList(players.replaceAll(name,"").split("")));
 
-      System.out.println(this.players.toString());
-      this.spies = spies;
-      init();
-    }
-  }
 
   public String do_Nominate(int number){
     removeOptimistic();
     removePessimistic();
     int randomInt =0;
-    String nomTeam = name;
+    String players = name;
     if(!optimistic.isEmpty()){
       System.out.println("Nominating from Optimistic");
       randomInt = randomGenerator.nextInt(optimistic.size());
@@ -216,7 +221,7 @@ public class bounder implements Agent{
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          nomTeam = nomTeam + players.get(i);
+          players = players + this.players.get(i);
           count++;
         }
       }
@@ -224,37 +229,47 @@ public class bounder implements Agent{
 
     else if (!pessimistic.isEmpty() && optimistic.isEmpty()){
       System.out.println("Nominating from Pessimistic");
-
       randomInt = randomGenerator.nextInt(pessimistic.size());
       Boolean[] bool = pessimistic.get(randomInt);
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          nomTeam = nomTeam + players.get(i);
+          players = players + this.players.get(i);
           count++;
         }
       }
     }
-    //TODO: Case if pessimistic runs out
     else{
-      for(int i =0; i < number;i++){
-        nomTeam = nomTeam+players.get(i)
-      }
+    //TODO: Case if pessimistic runs out
+    for(int i =0; i < number-1;i++){
+      players = players + this.players.get(i);
+
     }
-    System.out.println("Nominating +" nomTeam);
-    return nomTeam;
+  }
+    System.out.println(players);
+    return players;
 
   }
   public void get_Mission(String mission){
+    System.out.println("Mission is " + mission);
     members = new ArrayList<String>(Arrays.asList(mission.split("")));
   }
   public void get_Traitors(int traitors){
+    System.out.println("Traitors "+traitors);
     this.traitors = traitors;
   }
   public boolean do_Betray(){
-    return true;
+    if(spy){
+      System.out.println("Betraying!");
+      return true;
+    }
+    else{
+      System.out.println("Not Betraying");
+      return false;
+    }
   }
   public void get_ProposedMission(String leader, String mission){
+    System.out.println("Proposed Mission " +mission);
     ArrayList<String> temp = new ArrayList<String>(Arrays.asList(mission.split("")));
     propMembers = new ArrayList<Integer>();
     for(int i =0; i < players.size();i++){
@@ -267,6 +282,7 @@ public class bounder implements Agent{
   }
 
   public boolean do_Vote(){
+    System.out.println("Voting");
     removeOptimistic();
     removePessimistic();
     for(int i = 0; i < optimistic.size();i++){
@@ -280,9 +296,11 @@ public class bounder implements Agent{
       }
 
       if(count == propMembers.size()){
+        System.out.println("Voting Pass");
         return true;
       }
     }
+    System.out.println("Voting Fail");
     return false;
   }
   public void get_Accusation(String accuser, String accused){

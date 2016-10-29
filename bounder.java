@@ -123,11 +123,11 @@ public class bounder implements Agent{
         bool[i] = temp[i];
       }
       optimistic.add(bool);
-      System.out.println(Arrays.toString(optimistic.get(j)));
+      //System.out.println(Arrays.toString(optimistic.get(j)));
       j++;
     }
     pessimistic.addAll(optimistic);
-    System.out.println("------------------------");
+    //System.out.println("------------------------");
   }
 
   public ArrayList<Integer> onMission(){
@@ -197,6 +197,7 @@ public class bounder implements Agent{
     if(init){
       this.name = name;
       this.players = new ArrayList<String>(Arrays.asList(players.replaceAll(name,"").split("")));
+
       System.out.println(this.players.toString());
       this.spies = spies;
       init();
@@ -207,21 +208,21 @@ public class bounder implements Agent{
     removeOptimistic();
     removePessimistic();
     int randomInt =0;
-    String players = name;
-    if(optimistic.size()!=0){
+    String nomTeam = name;
+    if(!optimistic.isEmpty()){
       System.out.println("Nominating from Optimistic");
       randomInt = randomGenerator.nextInt(optimistic.size());
       Boolean[] bool = optimistic.get(randomInt);
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          players = players + this.players.get(i);
+          nomTeam = nomTeam + players.get(i);
           count++;
         }
       }
     }
 
-    else if (pessimistic.size()!=0){
+    else if (!pessimistic.isEmpty() && optimistic.isEmpty()){
       System.out.println("Nominating from Pessimistic");
 
       randomInt = randomGenerator.nextInt(pessimistic.size());
@@ -229,15 +230,19 @@ public class bounder implements Agent{
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          players = players + this.players.get(i);
+          nomTeam = nomTeam + players.get(i);
           count++;
         }
       }
     }
     //TODO: Case if pessimistic runs out
-    System.out.println(players);
-
-    return players;
+    else{
+      for(int i =0; i < number;i++){
+        nomTeam = nomTeam+players.get(i)
+      }
+    }
+    System.out.println("Nominating +" nomTeam);
+    return nomTeam;
 
   }
   public void get_Mission(String mission){
@@ -256,7 +261,6 @@ public class bounder implements Agent{
       for(int j = 0; j< temp.size();j++){
         if(players.get(i).equals(temp.get(j))){
           propMembers.add(i);
-          System.out.println(i);
         }
       }
     }

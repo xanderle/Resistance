@@ -15,14 +15,14 @@ public class Test{
     g.addPlayer(new Vladimir());
     g.addPlayer(new Vladimir());
     g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
+    g.addPlayer(new Vladimir());    
     g.setup();
     g.play();
     return g.government;
   }
 
   public static void main(String[] args){
-    if (args.length > 0){      
+    if (args.length > 0){
       n = Integer.parseInt(args[0]);
     }
     int count = 0;

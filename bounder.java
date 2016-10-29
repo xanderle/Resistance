@@ -1,6 +1,88 @@
 import java.util.*;
+import java.lang.reflect.Array;
+import java.util.*;
 
-public class bounder{
+class Permutations<E> implements  Iterator<E[]>{
+
+    private E[] arr;
+    private int[] ind;
+    private boolean has_next;
+    public E[] output;//next() returns this array, make it public
+
+    Permutations(E[] arr){
+        this.arr = arr.clone();
+        ind = new int[arr.length];
+        //convert an array of any elements into array of integers - first occurrence is used to enumerate
+        Map<E, Integer> hm = new HashMap<E, Integer>();
+        for(int i = 0; i < arr.length; i++){
+            Integer n = hm.get(arr[i]);
+            if (n == null){
+                hm.put(arr[i], i);
+                n = i;
+            }
+            ind[i] = n.intValue();
+        }
+        Arrays.sort(ind);//start with ascending sequence of integers
+
+
+        //output = new E[arr.length]; <-- cannot do in Java with generics, so use reflection
+        output = (E[]) Array.newInstance(arr.getClass().getComponentType(), arr.length);
+        has_next = true;
+    }
+
+    public boolean hasNext() {
+        return has_next;
+    }
+
+    /**
+     * Computes next permutations. Same array instance is returned every time!
+     * @return
+     */
+    public E[] next() {
+        if (!has_next)
+            throw new NoSuchElementException();
+
+        for(int i = 0; i < ind.length; i++){
+            output[i] = arr[ind[i]];
+        }
+
+
+        //get next permutation
+        has_next = false;
+        for(int tail = ind.length - 1;tail > 0;tail--){
+            if (ind[tail - 1] < ind[tail]){//still increasing
+
+                //find last element which does not exceed ind[tail-1]
+                int s = ind.length - 1;
+                while(ind[tail-1] >= ind[s])
+                    s--;
+
+                swap(ind, tail-1, s);
+
+                //reverse order of elements in the tail
+                for(int i = tail, j = ind.length - 1; i < j; i++, j--){
+                    swap(ind, i, j);
+                }
+                has_next = true;
+                break;
+            }
+
+        }
+        return output;
+    }
+
+    private void swap(int[] arr, int i, int j){
+        int t = arr[i];
+        arr[i] = arr[j];
+        arr[j] = t;
+    }
+
+    public void remove() {
+
+    }
+}
+
+public class bounder implements Agent{
   //Internal Variables
   boolean init = true;
   String name;
@@ -14,8 +96,10 @@ public class bounder{
   ArrayList<String> members;//members on the current mission
   int traitors; //people that betrayed
   //map people to index;
-  String curLeader;
-  String curMission;
+  ArrayList<Integer> propMembers;
+
+  String yays;
+
   Random randomGenerator = new Random();
   public Boolean[] selectBase(int size){
     switch(size){
@@ -39,18 +123,20 @@ public class bounder{
         bool[i] = temp[i];
       }
       optimistic.add(bool);
-      System.out.println(Arrays.toString(optimistic.get(j)));
+      //System.out.println(Arrays.toString(optimistic.get(j)));
       j++;
     }
     pessimistic.addAll(optimistic);
-    System.out.println("------------------------");
+    //System.out.println("------------------------");
   }
 
   public ArrayList<Integer> onMission(){
     int size = players.size();
     ArrayList<Integer> onMission = new ArrayList<Integer>();
     for(int i =0; i < size;i++){
-
+      if(members == null){
+        break;
+      }
       int membersSize = members.size();
       for(int j = 0;j< membersSize;j++){
         if(players.get(i).equals(members.get(j))){
@@ -83,7 +169,7 @@ public class bounder{
 
     }
   }
-
+  //TODO: Check Pessimistic Removal
   public void removePessimistic(){
     System.out.println("Removing from Pessimistic");
     System.out.println("------------------------");
@@ -111,6 +197,7 @@ public class bounder{
     if(init){
       this.name = name;
       this.players = new ArrayList<String>(Arrays.asList(players.replaceAll(name,"").split("")));
+
       System.out.println(this.players.toString());
       this.spies = spies;
       init();
@@ -118,34 +205,44 @@ public class bounder{
   }
 
   public String do_Nominate(int number){
+    removeOptimistic();
+    removePessimistic();
     int randomInt =0;
-    String players = name;
-    if(optimistic.size()!=0){
+    String nomTeam = name;
+    if(!optimistic.isEmpty()){
       System.out.println("Nominating from Optimistic");
       randomInt = randomGenerator.nextInt(optimistic.size());
       Boolean[] bool = optimistic.get(randomInt);
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          players = players + this.players.get(i);
+          nomTeam = nomTeam + players.get(i);
           count++;
         }
       }
     }
-    else{
+
+    else if (!pessimistic.isEmpty() && optimistic.isEmpty()){
       System.out.println("Nominating from Pessimistic");
+
       randomInt = randomGenerator.nextInt(pessimistic.size());
       Boolean[] bool = pessimistic.get(randomInt);
       int count = 1;
       for(int i =0; i < bool.length;i++){
         if(!bool[i] && count < number){
-          players = players + this.players.get(i);
+          nomTeam = nomTeam + players.get(i);
           count++;
         }
       }
     }
-    System.out.println(players);
-    return "";
+    //TODO: Case if pessimistic runs out
+    else{
+      for(int i =0; i < number;i++){
+        nomTeam = nomTeam+players.get(i)
+      }
+    }
+    System.out.println("Nominating +" nomTeam);
+    return nomTeam;
 
   }
   public void get_Mission(String mission){
@@ -158,14 +255,43 @@ public class bounder{
     return true;
   }
   public void get_ProposedMission(String leader, String mission){
-    curLeader = leader;
-    curMission = mission;
-  }
-  public boolean do_Vote(){
-    ArrayList<String> team = new ArrayList<String>();
-    for(int i =0 ;i < optimistic.size();i++){
-      Boolean[] bool = optimistic.get(i);
-
+    ArrayList<String> temp = new ArrayList<String>(Arrays.asList(mission.split("")));
+    propMembers = new ArrayList<Integer>();
+    for(int i =0; i < players.size();i++){
+      for(int j = 0; j< temp.size();j++){
+        if(players.get(i).equals(temp.get(j))){
+          propMembers.add(i);
+        }
+      }
     }
+  }
+
+  public boolean do_Vote(){
+    removeOptimistic();
+    removePessimistic();
+    for(int i = 0; i < optimistic.size();i++){
+      int count = 0;
+      Boolean[] bool = optimistic.get(i);
+      for(int j =0; j < propMembers.size();j++){
+        if(bool[propMembers.get(j)]){//is a spy
+          break;
+        }
+        count++;
+      }
+
+      if(count == propMembers.size()){
+        return true;
+      }
+    }
+    return false;
+  }
+  public void get_Accusation(String accuser, String accused){
+
+  }
+  public void get_Votes(String yays){
+    this.yays = yays;
+  }
+  public String do_Accuse(){
+    return "";
   }
 }

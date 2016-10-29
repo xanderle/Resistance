@@ -392,11 +392,16 @@ public class Game{
   public static void main(String[] args){
     //Run a single game
     Game g = new Game();
-    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'A');
-    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'B');
-    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'C');
-    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'D');
-    g.stopwatchOn();g.addPlayer(new bounder());g.stopwatchOff(1000,'E');
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new HumanAgent());
     g.setup();
     g.play();
     /*Run a tournament*/

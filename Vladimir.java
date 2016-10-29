@@ -199,10 +199,14 @@ public class Vladimir implements Agent{
     }
     // If spy then vote for if a spy is in the nomination
     else if (spy){
+      int count = 0;
       for (int i = 0; i < proposed.length(); i++){
         if (spies.indexOf(proposed.charAt(i)) != -1){
-          return true;
+          count++;
         }
+      }
+      if (count == 1){
+        return true;
       }
       // TODO: Add stealthy voting to not always reject the mission if spy not in it
       return false;

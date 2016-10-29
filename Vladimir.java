@@ -34,6 +34,12 @@ public class Vladimir implements Agent{
     public void setSuspicion(Double suspicion){
       this.suspicion = suspicion;
     }
+    public int getFails(){
+      return fails;
+    }
+    public void setFails(int fails){
+      this.fails = fails;
+    }
 
     public Player(char name){
       this.name = name;
@@ -41,6 +47,13 @@ public class Vladimir implements Agent{
       fails = 0;
     }
   }
+
+  /*
+    GAME VARIABLES
+  */
+  private int[] spyNum = {2,2,3,3,3,4};
+  private int[][] missionNum = {{2,3,2,3,3},{2,3,4,3,4},{2,3,3,4,4},{3,4,4,5,5},{3,4,4,5,5},{3,4,4,5,5}};
+  // private int[][] threshold = {{}};
 
   /*
     Variables common to all from Tim's implementation
@@ -69,9 +82,15 @@ public class Vladimir implements Agent{
   private String proposed, leader, latest, yays;
   private int traitors;
   private boolean present;
+  private boolean certain;
+
+  // Suspicion measures
+  double gg = 0.5;
+  double hh = 1.0;
 
   public Vladimir(){
     random = new Random();
+    this.certain = false;
   }
 
   /**
@@ -98,21 +117,18 @@ public class Vladimir implements Agent{
 
       // Add Players representations
       for (int i = 0; i < size; i++){
-        Player p = new Player(players.charAt(i));
-        // p.setSuspicion(random.nextInt(100));
-        suspects.add(p);
+        if (players.charAt(i) != name.charAt(0)){
+            Player p = new Player(players.charAt(i));
+            suspects.add(p);
+        }
       }
-
       Collections.sort(suspects, Collections.reverseOrder());
-
       for (Player s : suspects){
-        // System.out.println("PLAYER : " + s.getName() + " SUSPICION IS : " + s.getSuspicion());
       }
     }
 
     if (spy && mission == 1){
         set_Resistance(players, spies);
-        // System.out.println("I'M A SPY.");
     }
   }
 
@@ -192,6 +208,11 @@ public class Vladimir implements Agent{
       return false;
     }
     else {
+      if (proposed.length() > spies.length()){
+        if (proposed.indexOf(name) == -1){
+          return false;
+        }
+      }
       for (int i = 0; i < spies.length(); i++){
           Player p = suspects.get(i);
           // // System.out.println(p.getName() + " : " + p.getSuspicion());
@@ -208,6 +229,15 @@ public class Vladimir implements Agent{
 
   private void reevaluate(){
 
+    if (traitors == 0){
+      double increase = 1.0 / (players.length() - yays.length());
+      for (Player p : suspects){
+        if (yays.indexOf(p.getName()) == -1){
+          p.setSuspicion(p.getSuspicion() + hh * increase);
+        }
+      }
+    }
+
     /*
       THIS IS WHERE WE GONNA GET OUR DETECTIVE HAT ON
       OH SH*T! THE GAME IS AFOOT.
@@ -219,10 +249,15 @@ public class Vladimir implements Agent{
     //  Look at traitors and add a percentage
     if (present){
       double increase = (double)traitors / (latest.length() - 1);
+      /*
+      If the number of traitors is equal to the number of people on a mission
+      then the spies must be known
+      */
       if (traitors == (latest.length() - 1)){
         for (Player p : suspects){
           if (latest.indexOf(p.getName()) != -1){
-            p.setSuspicion(p.getSuspicion() + increase);
+            p.setSuspicion(1000.0);
+            certain = true;
           }
           else {
             p.setSuspicion(0.0);
@@ -230,9 +265,13 @@ public class Vladimir implements Agent{
         }
       }
       else {
+
         for (Player p : suspects){
           if (latest.indexOf(p.getName()) != -1){
-            p.setSuspicion(p.getSuspicion() + increase);
+            p.setSuspicion(p.getSuspicion() + gg * increase);
+          }
+          if (yays.indexOf(p.getName()) != -1){
+            p.setSuspicion(p.getSuspicion() + hh * 1/yays.length());
           }
         }
       }
@@ -241,10 +280,17 @@ public class Vladimir implements Agent{
       double increase = (double)traitors / (latest.length());
       for (Player p : suspects){
         if (latest.indexOf(p.getName()) != -1){
-          p.setSuspicion(p.getSuspicion() + increase);
+          p.setSuspicion(p.getSuspicion() + gg * increase);
+        }
+        if (yays.indexOf(p.getName()) != -1){
+          p.setSuspicion(p.getSuspicion() + hh * 1/yays.length());
         }
       }
     }
+
+    /*
+      Look at votes for the failed mission and assign suspicion
+    */
 
     Collections.sort(suspects);
     for (int i = 0; i < 2; i++){
@@ -289,11 +335,9 @@ public class Vladimir implements Agent{
    * @param traitors the number of people on the mission who chose to betray (0 for success, greater than 0 for failure)
    **/
   public void get_Traitors(int traitors){
-    if (traitors != 0){
-      this.traitors = traitors;
-      if (!spy){
-        reevaluate();
-      }
+    this.traitors = traitors;
+    if (!spy && !certain){
+      reevaluate();
     }
   }
 

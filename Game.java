@@ -225,6 +225,7 @@ public class Game{
    **/
   public static void main(String[] args){
     Game g = new Game();
+<<<<<<< Updated upstream
     g.addPlayer(new RandomAgent());
     g.addPlayer(new RandomAgent());
     g.addPlayer(new RandomAgent());
@@ -235,6 +236,13 @@ public class Game{
     g.addPlayer(new RandomAgent());
     g.addPlayer(new RandomAgent());
     g.addPlayer(new HumanAgent());
+=======
+    g.stopwatchOn();g.addPlayer(new Vladimir());g.stopwatchOff(1000,'A');
+    g.stopwatchOn();g.addPlayer(new Vladimir());g.stopwatchOff(1000,'B');
+    g.stopwatchOn();g.addPlayer(new Vladimir());g.stopwatchOff(1000,'C');
+    g.stopwatchOn();g.addPlayer(new Vladimir());g.stopwatchOff(1000,'D');
+    g.stopwatchOn();g.addPlayer(new Vladimir());g.stopwatchOff(1000,'E');
+>>>>>>> Stashed changes
     g.setup();
     g.play();
   }

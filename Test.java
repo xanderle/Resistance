@@ -11,18 +11,18 @@ public class Test{
 
   public static boolean RunGame(){
     Logger g = new Logger("log.txt");
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
+    g.addPlayer(new Bounder());
+    g.addPlayer(new Bounder());
+    g.addPlayer(new Bounder());
+    g.addPlayer(new Bounder());
+    g.addPlayer(new Bounder());
     g.setup();
     g.play();
     return g.government;
   }
 
   public static void main(String[] args){
-    if (args.length > 0){      
+    if (args.length > 0){
       n = Integer.parseInt(args[0]);
     }
     int count = 0;

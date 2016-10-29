@@ -12,10 +12,10 @@ public class Test{
   public static boolean RunGame(){
     Logger g = new Logger("log.txt");
     g.addPlayer(new Bounder());
-    g.addPlayer(new Bounder());
-    g.addPlayer(new Bounder());
-    g.addPlayer(new Bounder());
-    g.addPlayer(new Bounder());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
+    g.addPlayer(new RandomAgent());
     g.setup();
     g.play();
     return g.government;

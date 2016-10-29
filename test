@@ -1,0 +1,168 @@
+Spies are ??
+A
+[B, C, D, E]
+[true, true, false, false]
+[true, false, true, false]
+[true, false, false, true]
+[false, true, true, false]
+[false, true, false, true]
+[false, false, true, true]
+------------------------
+Proposed Mission BD
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Pass
+Mission is BD
+Traitors 0
+Proposed Mission ADE
+Voting
+Removing from Optimistic
+------------------------
+Number of Spies 1
+Number of Sabotages 0
+Configuration remove: [true, true, false, false]
+------------------------
+Number of Spies 2
+Number of Sabotages 0
+Configuration remove: [true, false, true, false]
+------------------------
+Number of Spies 1
+Number of Sabotages 0
+Configuration remove: [true, false, false, true]
+------------------------
+Number of Spies 1
+Number of Sabotages 0
+Configuration remove: [false, true, true, false]
+------------------------
+Number of Spies 1
+Number of Sabotages 0
+Configuration remove: [false, false, true, true]
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Proposed Mission ABD
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Pass
+Mission is ABD
+Betraying!
+Traitors 1
+Proposed Mission AB
+Voting
+Removing from Optimistic
+------------------------
+Number of Spies 0
+Number of Sabotages 1
+Configuration remove: [false, true, false, true]
+------------------------
+Removing from Pessimistic
+------------------------
+Number of Spies 0
+Number of Sabotages 1
+Configuration remove: [false, true, false, true]
+------------------------
+Voting Fail
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Nominating from Pessimistic
+AC
+Proposed Mission AC
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Mission is AC
+Betraying!
+Traitors 2
+Proposed Mission BDE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Number of Spies 1
+Number of Sabotages 2
+Configuration remove: [true, true, false, false]
+------------------------
+Number of Spies 0
+Number of Sabotages 2
+Configuration remove: [true, false, true, false]
+------------------------
+Number of Spies 0
+Number of Sabotages 2
+Configuration remove: [true, false, false, true]
+------------------------
+Number of Spies 1
+Number of Sabotages 2
+Configuration remove: [false, true, true, false]
+------------------------
+Number of Spies 0
+Number of Sabotages 2
+Configuration remove: [false, false, true, true]
+------------------------
+Voting Fail
+Proposed Mission CDE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Proposed Mission ADE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Mission is ADE
+Betraying!
+Traitors 1
+Proposed Mission ADE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Proposed Mission BDE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+ABC
+Proposed Mission ABC
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Proposed Mission BCE
+Voting
+Removing from Optimistic
+------------------------
+Removing from Pessimistic
+------------------------
+Voting Fail
+Mission is BCE
+Traitors 0
+Government: 100.0%
+Resistance: 0.0%

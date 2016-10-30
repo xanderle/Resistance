@@ -1,7 +1,7 @@
 import java.util.*;
 import java.lang.reflect.Array;
 import java.util.*;
-
+@SuppressWarnings({"unchecked", "deprecation"})
 class Permutations<E> implements  Iterator<E[]>{
 
     private E[] arr;

@@ -114,15 +114,15 @@ public class Bounder implements Agent{
 
   public void get_status(String name, String players, String spies, int mission, int failures){
     if(init){
-      System.out.println("Spies are " + spies);
+      // System.out.println("Spies are " + spies);
       this.name = name;
       this.players = new ArrayList<String>(Arrays.asList(players.replaceAll(name,"").split("")));
-      System.out.println(name);
-      System.out.println(this.players.toString());
+      // System.out.println(name);
+      // System.out.println(this.players.toString());
       this.spies = spies;
       if(spies.indexOf(name)!=-1){spy = true;}
       else{spy = false;};
-      System.out.println(spy);
+      // System.out.println(spy);
       init();
       init = false;
     }
@@ -137,11 +137,11 @@ public class Bounder implements Agent{
         bool[i] = temp[i];
       }
       optimistic.add(bool);
-      System.out.println(Arrays.toString(optimistic.get(j)));
+      // System.out.println(Arrays.toString(optimistic.get(j)));
       j++;
     }
     pessimistic.addAll(optimistic);
-    System.out.println("------------------------");
+    // System.out.println("------------------------");
   }
 
   public ArrayList<Integer> onMission(){
@@ -162,8 +162,8 @@ public class Bounder implements Agent{
   }
 
   public void removeOptimistic(){
-    System.out.println("Removing from Optimistic");
-    System.out.println("------------------------");
+    // System.out.println("Removing from Optimistic");
+    // System.out.println("------------------------");
     ArrayList<Integer> onMission = onMission();
     for(int i =0; i<optimistic.size();i++){
       int noSpies =0;
@@ -173,20 +173,20 @@ public class Bounder implements Agent{
         }
       }
       if(noSpies != traitors){
-        System.out.println("Number of Spies " + noSpies);
-        System.out.println("Number of Sabotages " + traitors);
-        System.out.println("Configuration remove: "+Arrays.toString(optimistic.get(i)));
+        // System.out.println("Number of Spies " + noSpies);
+        // System.out.println("Number of Sabotages " + traitors);
+        // System.out.println("Configuration remove: "+Arrays.toString(optimistic.get(i)));
         optimistic.remove(i);
         i--;
-        System.out.println("------------------------");
+        // System.out.println("------------------------");
       }
 
     }
   }
   //TODO: Check Pessimistic Removal
   public void removePessimistic(){
-    System.out.println("Removing from Pessimistic");
-    System.out.println("------------------------");
+    // System.out.println("Removing from Pessimistic");
+    // System.out.println("------------------------");
     ArrayList<Integer> onMission = onMission();
     for(int i =0; i < pessimistic.size();i++){
       int noSpies =0;
@@ -196,11 +196,11 @@ public class Bounder implements Agent{
         }
       }
       if(noSpies < traitors){
-        System.out.println("Number of Spies " + noSpies);
-        System.out.println("Number of Sabotages " + traitors);
-        System.out.println("Configuration remove: "+Arrays.toString(pessimistic.get(i)));
+        // System.out.println("Number of Spies " + noSpies);
+        // System.out.println("Number of Sabotages " + traitors);
+        // System.out.println("Configuration remove: "+Arrays.toString(pessimistic.get(i)));
         pessimistic.remove(i);
-        System.out.println("------------------------");
+        // System.out.println("------------------------");
         i--;
 
       }
@@ -215,7 +215,7 @@ public class Bounder implements Agent{
     int randomInt =0;
     String players = name;
     if(!optimistic.isEmpty()){
-      System.out.println("Nominating from Optimistic");
+      // System.out.println("Nominating from Optimistic");
       randomInt = randomGenerator.nextInt(optimistic.size());
       Boolean[] bool = optimistic.get(randomInt);
       int count = 1;
@@ -228,7 +228,7 @@ public class Bounder implements Agent{
     }
 
     else if (!pessimistic.isEmpty() && optimistic.isEmpty()){
-      System.out.println("Nominating from Pessimistic");
+      // System.out.println("Nominating from Pessimistic");
       randomInt = randomGenerator.nextInt(pessimistic.size());
       Boolean[] bool = pessimistic.get(randomInt);
       int count = 1;
@@ -246,30 +246,30 @@ public class Bounder implements Agent{
 
     }
   }
-    System.out.println(players);
+    // System.out.println(players);
     return players;
 
   }
   public void get_Mission(String mission){
-    System.out.println("Mission is " + mission);
+    // System.out.println("Mission is " + mission);
     members = new ArrayList<String>(Arrays.asList(mission.split("")));
   }
   public void get_Traitors(int traitors){
-    System.out.println("Traitors "+traitors);
+    // System.out.println("Traitors "+traitors);
     this.traitors = traitors;
   }
   public boolean do_Betray(){
     if(spy){
-      System.out.println("Betraying!");
+      // System.out.println("Betraying!");
       return true;
     }
     else{
-      System.out.println("Not Betraying");
+      // System.out.println("Not Betraying");
       return false;
     }
   }
   public void get_ProposedMission(String leader, String mission){
-    System.out.println("Proposed Mission " +mission);
+    // System.out.println("Proposed Mission " +mission);
     ArrayList<String> temp = new ArrayList<String>(Arrays.asList(mission.split("")));
     propMembers = new ArrayList<Integer>();
     for(int i =0; i < players.size();i++){
@@ -282,7 +282,7 @@ public class Bounder implements Agent{
   }
 
   public boolean do_Vote(){
-    System.out.println("Voting");
+    // System.out.println("Voting");
     removeOptimistic();
     removePessimistic();
     for(int i = 0; i < optimistic.size();i++){
@@ -296,11 +296,11 @@ public class Bounder implements Agent{
       }
 
       if(count == propMembers.size()){
-        System.out.println("Voting Pass");
+        // System.out.println("Voting Pass");
         return true;
       }
     }
-    System.out.println("Voting Fail");
+    // System.out.println("Voting Fail");
     return false;
   }
   public void get_Accusation(String accuser, String accused){

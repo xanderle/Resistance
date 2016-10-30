@@ -9,16 +9,24 @@ public class Solo{
 
   private static int n = 1;
 
-  public static boolean RunGame(){
-    Logger g = new Logger();
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.addPlayer(new Vladimir());
-    g.setup();
-    g.play();
-    return g.government;
+  public static class RunGame{
+    public boolean government;
+
+    public RunGame(int players, String bot){
+      Logger g = new Logger();
+      for (int i = 0; i < players; i++){
+        try {
+          Object agent = Class.forName(bot).newInstance();
+          g.addPlayer((Agent) agent);
+        }
+        catch (Exception e){
+          System.out.println(e.getMessage());
+        }
+      }
+      g.setup();
+      g.play();
+      government = g.government;
+    }
   }
 
   public static void main(String[] args){
@@ -27,7 +35,8 @@ public class Solo{
     }
     int count = 0;
     for (int i = 0; i < n; i++){
-      if (RunGame()){
+      RunGame rg = new RunGame(Integer.parseInt(args[1]), args[2]);
+      if (rg.government){
         count++;
       }
     }

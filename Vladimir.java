@@ -169,10 +169,10 @@ public class Vladimir implements Agent{
       while(team.contains(c)) c = players.charAt(random.nextInt(players.length()));
       team.add(c);
     }
+    // Always add self to team nominated
     team.add(name.charAt(0));
     String tm = "";
     for(Character c: team)tm+=c;
-    // System.out.println("\n*****\nI " + name + " nominate : " + tm + "\n*****\n");
     return tm;
   }
 
@@ -194,7 +194,7 @@ public class Vladimir implements Agent{
   public boolean do_Vote(){
 
     // Else if first mission then there is no knowledge so vote to confirm
-    if (mission == 1 || failures == 4){
+    if (mission == 1){
       return true;
     }
     // If spy then vote for if a spy is in the nomination
@@ -224,14 +224,15 @@ public class Vladimir implements Agent{
             return false;
           }
       }
-      // Check if our highest suspects are in the team and vote if better than half? Needs refining of premise.
       return true;
     }
-
-    // return (random.nextInt(2)!=0);
   }
 
   private void reevaluate(){
+
+    /*
+      If there are 0 traitors, then look at those who voted against the mission
+    */
 
     if (traitors == 0){
       double increase = 1.0 / (players.length() - yays.length());
@@ -272,7 +273,8 @@ public class Vladimir implements Agent{
 
         for (Player p : suspects){
           if (latest.indexOf(p.getName()) != -1){
-            p.setSuspicion(p.getSuspicion() + gg * increase);
+            p.setFails(p.getFails() + 1);
+            p.setSuspicion(p.getSuspicion() + gg * p.getFails() * increase);
           }
           if (yays.indexOf(p.getName()) != -1){
             p.setSuspicion(p.getSuspicion() + hh * 1/yays.length());
@@ -371,7 +373,7 @@ public class Vladimir implements Agent{
     }
     // If resistance then Vladimir will only notify of confirmed spies
     else {
-      return "Z";
+      return "";
       // return known;
     }
   }

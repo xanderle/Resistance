@@ -2,12 +2,7 @@ import java.util.*;
 
 /**
  * A Java class for an agent to play in Resistance.
- * Each agent is given a single capital letter, which will be their name for the game.
- * The game actions will be encoded using strings.
- * The agent will be created entirely in a single game, and the agent must maintain its own state.
- * Methods will be used for informing agents of game events (get_ methods, must return in 100ms) or requiring actions (do_ methods, must return in 1000ms).
- * If actions do not meet the required specification, a nominated default action will be recorded.
- * @author Tim French
+ * @author Jake Nelson
  * **/
 
 
@@ -53,7 +48,7 @@ public class Vladimir implements Agent{
   */
   private int[] spyNum = {2,2,3,3,3,4};
   private int[][] missionNum = {{2,3,2,3,3},{2,3,4,3,4},{2,3,3,4,4},{3,4,4,5,5},{3,4,4,5,5},{3,4,4,5,5}};
-  // private int[][] threshold = {{}};
+  // private int[] threshold = {3, 4, 4, 5, 10 , 10};
 
   /*
     Variables common to all from Tim's implementation
@@ -85,8 +80,9 @@ public class Vladimir implements Agent{
   private boolean certain;
 
   // Suspicion measures
-  double gg = 0.5;
-  double hh = 1.0;
+  double FAILED = 1.0;
+  double VOTED_FAILED = 0.5;
+  double SUSPECT_VOTE = 0.5;
 
   public Vladimir(){
     random = new Random();
@@ -154,6 +150,7 @@ public class Vladimir implements Agent{
    * */
   public String do_Nominate(int number){
     // If the first mission then pick at random
+    // NOTE: Is this the best way of nominating first round?
     if (mission == 1){
       HashSet<Character> team = new HashSet<Character>();
       for(int i = 0; i<number-1; i++){
@@ -162,18 +159,18 @@ public class Vladimir implements Agent{
         team.add(c);
       }
     }
-    // Don't pick the same from the first team
-    HashSet<Character> team = new HashSet<Character>();
+    /*
+      If spy or resistance then benefit from appearing to nominate spyless teams
+    */
+    Collections.sort(suspects, Collections.reverseOrder());
+    String team = "";
     for(int i = 0; i<number-1; i++){
-      char c = players.charAt(random.nextInt(players.length()));
-      while(team.contains(c)) c = players.charAt(random.nextInt(players.length()));
-      team.add(c);
+      Player p = suspects.get(i);
+      team += p.getName();
     }
     // Always add self to team nominated
-    team.add(name.charAt(0));
-    String tm = "";
-    for(Character c: team)tm+=c;
-    return tm;
+    team += name.charAt(0);
+    return team;
   }
 
   /**
@@ -205,7 +202,7 @@ public class Vladimir implements Agent{
           count++;
         }
       }
-      if (count == 1){
+      if (count == 1 || (mission == 7 && count == 2) ){
         return true;
       }
       // TODO: Add stealthy voting to not always reject the mission if spy not in it
@@ -217,6 +214,7 @@ public class Vladimir implements Agent{
           return false;
         }
       }
+      Collections.sort(suspects);
       for (int i = 0; i < spies.length(); i++){
           Player p = suspects.get(i);
           // // System.out.println(p.getName() + " : " + p.getSuspicion());
@@ -235,12 +233,15 @@ public class Vladimir implements Agent{
     */
 
     if (traitors == 0){
-      double increase = 1.0 / (players.length() - yays.length());
-      for (Player p : suspects){
-        if (yays.indexOf(p.getName()) == -1){
-          p.setSuspicion(p.getSuspicion() + hh * increase);
+      if (players.length() != yays.length()){
+        double increase = 1 / (players.length() - yays.length());
+        for (Player p : suspects){
+          if (yays.indexOf(p.getName()) == -1){
+            p.setSuspicion(p.getSuspicion() + SUSPECT_VOTE * increase);
+          }
         }
       }
+
     }
 
     /*
@@ -274,10 +275,10 @@ public class Vladimir implements Agent{
         for (Player p : suspects){
           if (latest.indexOf(p.getName()) != -1){
             p.setFails(p.getFails() + 1);
-            p.setSuspicion(p.getSuspicion() + gg * p.getFails() * increase);
+            p.setSuspicion(p.getSuspicion() + FAILED * p.getFails() * increase);
           }
           if (yays.indexOf(p.getName()) != -1){
-            p.setSuspicion(p.getSuspicion() + hh * 1/yays.length());
+            p.setSuspicion(p.getSuspicion() + VOTED_FAILED * 1/yays.length());
           }
         }
       }
@@ -286,10 +287,10 @@ public class Vladimir implements Agent{
       double increase = (double)traitors / (latest.length());
       for (Player p : suspects){
         if (latest.indexOf(p.getName()) != -1){
-          p.setSuspicion(p.getSuspicion() + gg * increase);
+          p.setSuspicion(p.getSuspicion() + FAILED * increase);
         }
         if (yays.indexOf(p.getName()) != -1){
-          p.setSuspicion(p.getSuspicion() + hh * 1/yays.length());
+          p.setSuspicion(p.getSuspicion() + VOTED_FAILED * 1/yays.length());
         }
       }
     }
@@ -374,7 +375,6 @@ public class Vladimir implements Agent{
     // If resistance then Vladimir will only notify of confirmed spies
     else {
       return "";
-      // return known;
     }
   }
 

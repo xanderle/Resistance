@@ -40,7 +40,7 @@ public class Solo{
         count++;
       }
     }
-    System.out.println("Government: " + (double)count/n * 100 + "%\nResistance: " + (double)(n-count)/n * 100 + "%");
+    System.out.format("Government: %6.2f %%\nResistance: %6.2f %%\n", (double)count/n * 100, (double)(n-count)/n * 100 );
   }
 
 }

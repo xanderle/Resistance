@@ -85,7 +85,10 @@ public class Test{
     }
     System.out.println("RESULTS:\nGovernment: " + (double)count/n * 100 + "%\nResistance: " + (double)(n-count)/n * 100 + "%\n\nPLAYERS:\n");
     for (Player p : players){
-      System.out.println(p.bot + " was " + p.name + "\nResistance: " + p.resistance + " games with " + (double)p.rwins/p.resistance*100 + "% win rate\nGovernment: "+ p.government + " games with " + (double)p.gwins/p.government*100 + "%win rate\n");
+      // System.out.println(p.bot + " was " + p.name + "\nResistance: " + p.resistance + " games with " + (double)p.rwins/p.resistance*100 + "% win rate\nGovernment: "+ p.government + " games with " + (double)p.gwins/p.government*100 + "%win rate\n");
+      System.out.println(p.bot + " was " + p.name);
+      System.out.format("Resistance: %d games with %6.2f%%  win rate\n", p.resistance, (double)p.rwins/p.resistance*100);
+      System.out.format("Government: %d games with %6.2f%%  win rate\n\n", p.government, (double)p.gwins/p.government*100);
     }
   }
 
